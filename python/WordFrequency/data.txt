@@ -1,0 +1,544 @@
+ReactJS components are difficult to reuse in complex interactive web projects.
+ReactJS’s Virtual DOM algorithm is time-consuming and imprecise.
+ReactJS’s HTML templates are neither complete nor powerful.
+ReactJS requires complicated asynchronous programming while communicating with the server.
+Binding.scala has less concepts but more features. The promising Binding.scala solves complicated issues that ReactJS cannot.
+(Editor’s note: This five-part series was originally published in Chinese on the Chinese edition of Insights and on InfoQ China.)
+
+It is well-known that React is a great tool for implementing simple interactive websites, but how does it apply on complex interactive front-end projects? Does it function as well as it did in simple interactive websites?
+
+In this article, I will introduce several problems that I encountered using React during program development and why I decided to develop a new framework in Scala to compare with React. Surprisingly, the amount of code was approximately 1000 lines, while there were roughly 30,000 lines in React.
+
+Background
+RELATED SPONSORED CONTENT
+Monitor the time taken by DB queries and external calls. Identify slow queries and eliminate them.
+Free Scrum Master Learning Path
+When, Where & Why to Use NoSQL?
+Product Comparison Report for Key-Value Stores
+What Are The Most Secure Programming Languages
+RELATED SPONSOR
+
+An In-Depth Look at the DevOps Toolchain.
+
+Last April, I first came across React on a client project. Compared to AngularJS, a framework that I had used before, the React framework was more accessible, convenient and useful.
+
+Responsive data-binding is one of the most useful features of the React framework. It maps the sources of upstream data to elements on webpages, which provide a handy way to implement simple interactive websites.
+
+However, after a few weeks, as I became more skilled in React, I noticed a serious problem: React could not solve tangled problems as conveniently as simple ones.
+
+Next, I experimented with an application called TodoMVC. The graph below shows the TodoMVC app using my framework.
+
+
+
+The framework I am using is called Binding.scala. It turned out that the app using my framework only had 154 lines of code, but using the React framework, it had 488 lines of code.
+
+In the following sections, I will explain four issues in React and how Binding.scala resolves these issues.
+
+Issue 1: React components are difficult to reuse in complex interactive web projects.
+The minimal reusable unit in React framework is React.Component. It is more lightweight than Controller and View in the AngularJS framework. That allows web developers to exclusively provide one render function, which maps props and state to HTML elements.
+
+Such a lightweight component is very handy in rendering plain and static webpages. Nonetheless, when there are interactions between one component and another, passing callback functions as parameters are inevitable. Particularly for webpages with complicated structures, we have to nest dozens of components from the inside-out, where those callback functions are passed through from parent to child components across layers and layers. The only outcome for applying React framework in complex interactive web projects is that the codebase would become too messy to maintain.
+
+In More than React II: Does React.Component damage the reusability of React?, I will compare native DHTML API, React and Binding.scala for designing a reusable and interactive webpage and address how to straightforwardly implement a reusable and convoluted interactive logic using Binding.scala.
+
+Issue 2: React’s Virtual DOM algorithm is time-consuming and imprecise.
+The web page rendering algorithm of React framework is a virtual DOM differentiation algorithm.
+
+Developers are required to provide render functions that create virtual DOMs according to props and state, and React will construct real DOMs based on the virtual DOMs given by render functions.
+
+React will call render functions again and then create new virtual DOMs if there is a change in state. Next, it will analyze the differences between the updated version and the old version of virtual DOMs and apply it into the real DOM.
+
+There are two weaknesses during the process:
+
+No matter what is changed in-state, render functions will always generate new and complete virtual DOMs. If the render function is extremely perplexing, precious computational resources are wasted.
+It is time-consuming and imprecise for the React framework to compare two versions of DOMs. For instance, if you wanted to insert <li> on the top of a <ul> form, then the React framework would misjudge that you modified all components of <ul> and appended <li> at the end.
+Since the two versions of virtual DOMs are mutually independent, the React framework has no idea about what is going on in data sources, randomly guessing processing operations depending on just these two DOMs. This kind of algorithm is extremely slow and inaccurate. Web developers would need to provide a key attribute, shouldComponentUpdate method, or componentWillUpdate method to help the React framework to guess right.
+
+In More than React III: Is virtual DOM dead?, I will compare render functions in React, AngularJS and Binding.scala frameworks and then introduce an accurate data-binding mechanism that is straightforward and high-performance in Binding.scala.
+
+Issue 3: React’s HTML templates are neither complete nor powerful.
+React supports JSX to develop HTML templates.
+
+Theoretically, front-end engineers can change static HTML models into dynamic web pages as long as they copy these static HTML models into JSX source files and add some variable substitution codes. Indeed, React is the most suitable option to reuse the given HTML templates compared to other frameworks such as Cycle.js, Widow and ScalaTags.
+
+However, React’’s support for HTML is incomplete. Developers have to manually replace class and for attributes with classname and htmlFor. Furthermore, they also need to change inline styles from the CSS syntax to JSON syntax, which enables the eligible code functions. Though web engineers can copy and paste HTML models into codes, it still requires a lot of time and efforts to actually implement and then successively run the program. In this way, React is not superior compared to Cycle.js, widok or ScalaTags.
+
+In addition, React provides propTypes mechanism to check the validity of virtual DOMs. Yet this mechanism is full of holes. Even if we specify a propType, React can only find errors while running the program but fail to find them in compilation.
+
+propType also cannot locate naming errors. For example, if you spelled onclick instead of onClick, React would report no errors and the program would crash as well. In this case, developers would typically spend a lot of time and energy looking for such a meaningless error.
+
+In More than React IV: How to statically compile HTML?, I will introduce how Binding.scala statically checks both syntax errors and semantic errors while completely supporting XHTML syntax and I will compare HTML models using React and Binding.scala framework.
+
+Issue 4: React requires complicated asynchronous programming while communicating with the server.
+MVVM, also known as Model-View-ViewModel, is a framework where React loads data from the server. Web engineers need to develop an access services layer as Model and treat state in React as ViewModel and render as View. Model is in charge of accessing the Backend API and setting data to state (aka. ViewModel) via implementing Promise and fetch API. Then render (aka. View) is responsible to render ViewModel on webpages.
+
+During this process, the front-end programmers need to develop an asynchronous procedure that is consisted of massive closures. In this way, setting and accessing codes are in chaos and bugs come up endlessly. Even if we deal with all sorts of asynchronous events as meticulously as possible, the program would become incredibly complicated, which makes the program hard to debug and maintain.
+
+In More than React, Part Five: Is asynchronous programming an awful programming model?, I will introduce how Binding.scala automatically synchronises the data from the server and prevents manually asynchronous programming and also compare the synchronization of data model using React and Binding.scala.
+
+Conclusion
+Though Binding.scala somewhat looks like React, the mechanism hidden behind it is easier and more universal, which is completely different from React and Widok.
+
+Apparently, Binding.scala is more flexible and powerful. We can use Binding.scala to solve complicated issues that React cannot.
+
+For example, besides the four facets above, the state management problem of React is non-negligible. If we introduce a third-party library such as Redux to deal with the state, the framework would become tangled and the number of layers would increase.
+
+By contrast, Binding.scala describes a complex state using the same data-binding mechanism, the same as rendering a web page. And it does not need to introduce a third-party library to provide features like client-server communication, state management, and URL dispatching.
+
+Differences between Binding.scala and React:
+
+ 
+
+ 
+
+Binding.scala
+
+React
+
+Reusability
+
+Minimal Reusable Units
+
+Method
+
+Component
+
+Difficulty Levels of Reusability
+
+Can be reused no matter in either interactive or static components
+
+Easy to reuse in static components but hard to use in interactive components
+
+Webpage Render Algorithm
+
+Algorithm
+
+Precise data-binding
+
+Virtual DOM
+
+Productivity
+
+High
+
+Low
+
+Correctiveness
+
+Automatically ensures correctiveness
+
+Needs to be manually setup by developers keyattributes, otherwise the complicated webpages will become a mess
+
+HTML Models
+
+Syntax
+
+Scala XML literals
+
+JSX
+
+Does it support HTML or XHTML syntax
+
+Completely supports XHTML
+
+Partially supports, normal XHTML cannot compile.Developers must manually replace classand for attribute with className and htmlFor，what’s more, change style style from CSS syntax to JSON syntax
+
+How to check the syntax of the model
+
+Checks while automatically compiling
+
+Runs through `propTypes` but cannot locate obvious spelling errors
+
+Server Communication
+
+Mechanism
+
+Automatic Remote Data-binding
+
+MVVM + Asynchronous Programming
+
+Difficulty Levels of Implementation
+
+Easy
+
+Hard
+
+Others
+
+How to dispatch URL
+
+Supports URLs as normal binding variables, do not need third-party library
+
+Doesn’t support, need third-party library react-router
+
+Completeness of Functionality
+
+Complete font-end developing solutions
+
+Only contains partial functions such as View. Also requires third-party library to implement complete front-end program
+
+Learning Curve
+
+API is relatively simple，and it is easy for those people who have never used Scala to understand
+
+Handy. But it is extremely hard to study the third-party library which is used to compensate the weaknesses of the framework
+
+ 
+
+ 
+
+Binding.scala
+
+React
+
+Two months ago, when I released Binding.scala in the Scala.js community, the most popular responsive front-end programming framework is Widok. Tim Nieradzik is the author of Widoc. Once he saw my framework, he could not help himself to compliment that it is the most promising HTML5 rendering framework.
+
+Yes, he is right. Two months later, Binding.scala is now the most popular responsive front-end programming framework in Scala.js community.
+
+Awesome Scala compares my framework with other counterparts also and it concludes that the activity and popularity of Binding.scala is incredibly higher than any other frameworks such as Udash and Widok.
+
+
+
+In my recent projects, I gradually gave up using JavaScript and React but used Scala.js and Binding.scala instead. Because of Binding.scala, the future of front-end techniques has never been so bright and promising.
+
+External Links
+Binding.scala webpage
+Binding.scala • TodoMVC webpage
+Binding.scala • TodoMVC DEMO
+Binding.scala • TodoMVC other DEMO
+From JavaScript to Scala.js guideline
+Scala.js webpage
+Scala API references
+Scala.js API references
+Scala.js DOM API references
+Binding.scala guideline for beginners
+Binding.scala API references
+Binding.scala's Gitter chat room
+Acknowledgement
+My sincere thanks to my reviewers: Kaifeng Zhang, Peizhen Zheng, Jie Zhang, and Ting Han. This article has been improved by the extremely valuable suggestions from the fine individuals I am proud to work with. And I also want to thank Jingyu Zhou for helping with the translation.
+
+About the Author
+Yang Bo is a ten-year working experience developer and works at ThoughtWorks China as a Lead Consultant now. He's an active open-source contributor in Scala, ActionScript, and Haxe community. 
+
+This content is in the Web Development topic
+Related Topics: 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+POPULAR IN WEB DEVELOPMENT
+Chrome Phasing out Support for User Agent
+Facebook Introduces Rome Experimental JavaScript Toolchain
+Stork, a Rust/Wasm-Based Fast Full-Text Search for the JAMStack
+Adobe Open-Sources Adaptive, Accessible Color Palettes Generator
+Web Components at Scale at Salesforce: Challenges Encountered, Lessons Learnt
+POPULAR ACROSS INFOQ
+Google Introduces TensorFlow Developer Certification
+Facebook Introduces Rome Experimental JavaScript Toolchain
+Amazon Introduces a New Feature for ElastiCache for Redis: Global Datastore
+Software Teams and Teamwork Trends Report Q1 2020
+Stork, a Rust/Wasm-Based Fast Full-Text Search for the JAMStack
+Joe Duffy on Infrastructure as Code, Pulumi, and Multi-Cloud
+RELATED CONTENT
+ES2020's Feature Set Finalized
+ts-toolbelt Adds over 200 Type Utilities to TypeScript
+NativeScript 6.3, 6.4, 6.5 Releases Add Svelte, WebAssembly, KotlinJS and Performance Improvements
+Ionic's Stencil Component Compiler Design Considerations -- Adam Bradley at DotJS2019
+Adobe Open-Sources Adaptive, Accessible Color Palettes Generator
+WebDriverIO Version 6 Release Adds Native Chrome DevTools Automation Protocol Support
+Google's MediaPipe Machine Learning Framework Web-Enabled with WebAssembly
+Theia Framework 1.0 Enables Web IDEs
+Facebook Introduces Rome Experimental JavaScript Toolchain
+Web Components at Scale at Salesforce: Challenges Encountered, Lessons Learnt
+Babel 7.9 Reduces Bundle Sizes, Adds TypeScript 3.8 Support
+RELATED SPONSORED CONTENT
+
+A NoSQL Database Architecture for Real-Time Applications
+Aerospike
+
+
+What 30 Million Workflows Reveal About DevOps in Practice
+CircleCI
+
+RELATED CONTENT
+Next.js 9.3 Released, Improves Static Site Generation
+Chrome Phasing out Support for User Agent
+CSS Writing Modes Now an Official Web Standard
+Prettier 2.0 Supports Typescript 3.8, Improves CLI
+Adaptive Loading for a Faster Web
+Airbnb Transfers Ownership of Enzyme, Its React Testing Library
+JavaScript Face Detection with face-api.js
+How to Collect Pieces of Data
+How to Collect Pieces of Data
+Icon
+Pick Your Region: Earth; Cloudflare Workers
+Pick Your Region: Earth; Cloudflare Workers
+Tone.js Interactive Music Web Framework
+JavaScript and Web Development InfoQ Trends Report 2020
+JavaScript and Web Development InfoQ Trends Report 2020
+RELATED SPONSORED CONTENT
+
+Monitor your applications built in Java, .NET , Ruby, PHP and Node.js
+Site24x7
+
+
+When, Where & Why to Use NoSQL?
+Aerospike
+
+RELATED CONTENT
+Icon
+Full Stack Angular: Live Coding and Discussion
+Full Stack Angular: Live Coding and Discussion
+Functional UI (Framework-Free at Last)
+Functional UI (Framework-Free at Last)
+The Datum Data Binding Library
+The Datum Data Binding Library
+Icon
+Make Your Electron App Feel at Home Everywhere
+Make Your Electron App Feel at Home Everywhere
+Icon
+The InfoQ eMag - The InfoQ Software Trends Report 2019: Volume 1
+The InfoQ eMag - The InfoQ Software Trends Report 2019: Volume 1
+Angular 9.1 Adds TypeScript 3.8 Support and Faster Builds
+Stork, a Rust/Wasm-Based Fast Full-Text Search for the JAMStack
+Material-UI 4.9 Release Improves Support for Material Design Specification
+Chrome 81 Release Features New AR and NFC Features, and Redesigned HTML Form Controls
+GitHub to Acquire Npm in an Effort to Provide Continuity and Improvement
+Tailwind CSS 1.2 Release Adds CSS Grid Support
+The InfoQ Newsletter
+A round-up of last week’s content on InfoQ sent out every Tuesday. Join a community of over 250,000 senior developers. View an example
+
+Enter your e-mail address
+We protect your privacy.
+
+
+
+Please enter a subject
+Message
+Allowed html: a,b,br,blockquote,i,li,pre,u,ul,p
+
+Community comments
+More than react misgudge
+by Sergey Poskachey / Feb 09, 2017 11:41
+
+Re: More than react misgudge
+by Yang Bo / Feb 10, 2017 10:21
+
+More on React
+by Charanjeet Kaur / Feb 09, 2017 06:45
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:29
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:38
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:39
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:48
+
+More than react misgudge
+by Sergey Poskachey / Feb 09, 2017 11:41
+
+I would argue with the statements in this article.
+Firts of all React is not a full stack web framework.
+It's just a "view" part of Model View Whatever concept.
+Thus first and last cons of this reading is not related to react.
+One should use some data flow manipulation means in conjunction with react when building big apps.
+A good example is Redux based on FB Flux approach.
+There a "service" diapatch function is available for every component and you can avoid cluttering components with passing callbacks.
+Async logic can be easily implemented using redux-saga with them utilizing es6 generators.
+It allows to describe the flow of a certain action as synchronized one: do some preparation, send request, wait on success, update your state, do smething else, quit.
+Problems with class name and for attrs in JSX is not a real issue I would say.
+While as flow typing is still indeed immature we use FB flow type to cover whole app.
+And inline styling I would say is bad approach anyway because we ptefer to store and load style to/from CDN via CSS classes.
+As for React's Dom comparing algorithm we do experience some problems.
+You always have to keep in mind how many rendering cycles you would trigger performing some data manipulation.
+To sum up:
+Two of four cons of the article are irrelevant to React because data manipulation infrastructure is out of the React's scope.
+JSX templates are a good fit even for big apps.
+And React's vertual DOM algoriths should be improved indeed.
+
+More on React
+by Charanjeet Kaur / Feb 09, 2017 06:45
+
+Issue 1: React components are difficult to reuse in complex interactive web projects.
+As also mentioned in previous commit, we can "subscribe" to actions than having to pass the callback functions. And, this is easy with redux.
+www.ctheu.com/2015/02/12/how-to-communicate-bet...
+Issue 2: React’s Virtual DOM algorithm is time-consuming and imprecise.
+I am interested in learning more on this and will spend time in understanding how binding.scala solves it. As per my understanding, comparing two versions of the DOM is done by matching shallow copy. Here, it's required that developers are careful not to mutate the data.
+facebook.github.io/react/docs/optimizing-perfor...
+Issue 3: React’s HTML templates are neither complete nor powerful.
+I agree that html is not directly usable with react. What we do is to look into material ui like UI frameworks to look for UI requirement. And, that reduces the development time. We avoid inline CSS. I haven't yet explored Cycle.js, Widok or Scala Tags. It seems like a good time to do so :)
+In addition, Typescript is said to be syntactically and semantically analyzing the code. I am interested in learning more on how binding.scala can do it at compile time!
+Issue 4: React requires complicated asynchronous programming while communicating with the server.
+async api calls are super easy with redux. We just need to call a promise. I don't see a flaw here.
+I have used flux before. I faced the problem of async api calls there. We are currently working on redux. It is easy to understand and, I have experienced dramatic reduction in lines of code. I find the learning curve of redux shorter than flux.
+
+
+Re: More than react misgudge
+by Yang Bo / Feb 10, 2017 10:21
+
+We understand the benefits of React/Redux/Promise/generator's tech-stack you mentioned, and we realize that it helps developers on some point. I am sure you feel "be easily implemented" or "good" when you compare React stack with your original jQuery or other development experience.
+However, this series of articles are comparison between React stack with Binding.scala. React is good, but we thought it is not good enough when comparing with our framework, Binding.scala.
+We will reveal how to resolve the problems mentioned in this article, with the help of Binding.scala, resulting simpler design and abstraction, which is 3X or 4X less code than React tech-stack.
+I appreciate your feedback on this article. I hope you would keep your attentions on the rest incoming articles and see if they answer your questions.
+
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:29
+
+Issue 1: React components are difficult to reuse in complex interactive web projects.
+As also mentioned in previous commit, we can "subscribe" to actions than having to pass the callback functions. And, this is easy with redux.
+www.ctheu.com/2015/02/12/how-to-communicate-bet...
+
+
+I will introduce another way to capsulate callbacks as bindable values in the part 2 article of this series. After you read the article, you will find out if the redux way is easy enough.
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:38
+
+Issue 2: React’s Virtual DOM algorithm is time-consuming and imprecise.
+I am interested in learning more on this and will spend time in understanding how binding.scala solves it. As per my understanding, comparing two versions of the DOM is done by matching shallow copy. Here, it's required that developers are careful not to mutate the data.
+facebook.github.io/react/docs/optimizing-perfor...
+
+
+Regardless how React update real DOM, React continuously builds the entire virtual DOM for a component, whenever its state changes. This can be avoid by compiler-time analyzation on HTML template. Binding.scala's compiles one HTML templating function into small piece of functions. As a result, only a small part of code is reevaluated when the data source change.
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:39
+
+Issue 3: React’s HTML templates are neither complete nor powerful.
+I agree that html is not directly usable with react. What we do is to look into material ui like UI frameworks to look for UI requirement. And, that reduces the development time. We avoid inline CSS. I haven't yet explored Cycle.js, Widok or Scala Tags. It seems like a good time to do so :)
+
+In addition, Typescript is said to be syntactically and semantically analyzing the code. I am interested in learning more on how binding.scala can do it at compile time!
+
+Enjoy it!
+
+Re: More on React
+by Yang Bo / Feb 10, 2017 10:48
+
+Issue 4: React requires complicated asynchronous programming while communicating with the server.
+async api calls are super easy with redux. We just need to call a promise. I don't see a flaw here.
+
+I have used flux before. I faced the problem of async api calls there. We are currently working on redux. It is easy to understand and, I have experienced dramatic reduction in lines of code. I find the learning curve of redux shorter than flux.
+
+
+There is other approach than promise.then(), even in JavaScript world.
+
+Binding.scala's remote data-binding is like react-refetch in concept, except its API is 10X smaller and more general.
+
+Please wait for the last article in this series.
+DEVELOPMENT
+Theia Framework 1.0 Enables Web IDEs
+Code Search Now Available to Browse Google's Open-Source Projects
+DNSSEC Signing Potentially Interrupted by Coronoavirus
+ARCHITECTURE & DESIGN
+Peter Bourgon on CRDTs and State at the Edge
+Streaming a Million likes/second: Real-time Interactions on Live Video
+Joe Duffy on Infrastructure as Code, Pulumi, and Multi-Cloud
+CULTURE & METHODS
+Playful Leadership — How To Enable Transformational Change And Have Fun Doing It
+Looking after Mental Health and Wellbeing During COVID-19
+Software Teams and Teamwork Trends Report Q1 2020
+AI, ML & DATA ENGINEERING
+From POC to Production in Minimal Time - Avoiding Pain in ML Projects
+Real-time Data Streaming with Azure Stream Analytics
+AlphaFold Algorithm Predicts COVID-19 Protein Structures
+DEVOPS
+Grafana Labs Announces GA of Cortex v1.0 and Discusses Architectural Changes
+GitHub Was down Multiple Times Last February: Here's Why
+Reimagining CI/CD Pipelines as Composable Blocks with Bryan Liles
+The InfoQ Newsletter
+A round-up of last week’s content on InfoQ sent out every Tuesday. Join a community of over 250,000 senior developers. View an example
+
+Get a quick overview of content published on a variety of innovator and early adopter technologies
+Learn what you don’t know that you don’t know
+Stay up to date with the latest information from the topics you are interested in
+Enter your e-mail address
+We protect your privacy.
+
+QCons Worldwide
+NEXT EVENT
+QCon New York
+Software Development Conference
+
+Jun 15-19, 2020
+
+Upcoming QCons
+New York/ Jun 15-19, 2020
+Beijing/ Jun 22-24, 2020
+Guangzhou/ Sep 4-5, 2020
+São Paulo/ 2020
+Shanghai/ Oct 15-17, 2020
+!!!NEW Munich/ Oct 19–21, 2020
+San Francisco/ Nov 16–20, 2020
+London/ Spring, 2021
+Home
+Create Account
+QCon Conferences
+Contribute
+InfoQ Writers
+About InfoQ
+About C4Media
+Media Kit
+QCons Worldwide
+New York
+JUN 15-19, 2020
+Beijing
+JUN 22-24, 2020
+QCon Guangzhou
+SEP 4-5, 2020
+QCon São Paulo
+2020
+QCon Shanghai
+OCT 15-17, 2020
+Munich
+OCT 19-21, 2020
+San Francisco
+NOV 16-20, 2020
+London
+SPRING, 2021
+Follow us on
+145k
+Followers
+9k
+Followers
+19k
+Readers
+38k
+Followers
+18k
+Likes
+Alexa
+New
+1%for a Better World
+
+We care about the world in which we live and we want to make it a better place.
+
+We are doing so by fulfilling our mission to accelerate the human side of software development.
+
+We also donate 1% of our profit to different causes, which we as a company, as well as our employees, strongly believe in.
+
+General Feedback
+feedback@infoq.com
+Advertising
+sales@infoq.com
+Editorial
+editors@infoq.com
+Marketing
+marketing@infoq.com
+InfoQ.com and all content copyright © 2006-2019 C4Media Inc. InfoQ.com hosted at Contegix, the best ISP we've ever worked with.
