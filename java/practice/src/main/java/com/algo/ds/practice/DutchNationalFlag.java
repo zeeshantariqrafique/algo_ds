@@ -34,7 +34,7 @@ public class DutchNationalFlag {
 	 * Logic for Dutch national flag problem Sample Input : {1,0,0,2,1,0,1,2,1,0}
 	 * Sample Output :{0,0,0,0,1,1,1,1,2,2}
 	 **/
-	public static int[] dutchNationalFlag(int[] array) {
+	public static void dutchNationalFlag(int[] array) {
 		int low = 0;
 		int middle = 0;
 		int temp = 0;
@@ -52,7 +52,6 @@ public class DutchNationalFlag {
 				high--;
 			}
 		}
-		return array;
 	}
 
 	public static void main(String[] args) {
