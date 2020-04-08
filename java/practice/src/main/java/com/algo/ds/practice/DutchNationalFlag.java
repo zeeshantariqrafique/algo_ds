@@ -69,7 +69,7 @@ public class DutchNationalFlag {
 					break;
 				}
 			}
-			inputArr = dutchNationalFlag(inputArr);
+			dutchNationalFlag(inputArr);
 			printArr(inputArr);
 		}
 	}
