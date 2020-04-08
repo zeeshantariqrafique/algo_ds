@@ -37,7 +37,6 @@ public class DutchNationalFlag {
 	public static void dutchNationalFlag(int[] array) {
 		int low = 0;
 		int middle = 0;
-		int temp = 0;
 		int high = array.length - 1;
 		while (middle <= high) {
 
@@ -64,9 +63,7 @@ public class DutchNationalFlag {
 			System.out.println("Enter elements of array , Values should be between 0 , 1 and 2");
 			while (scan.hasNext()) {
 				inputArr[count++] = scan.nextInt();
-				if (count == size) {
-					break;
-				}
+				if (count == size) break;
 			}
 			dutchNationalFlag(inputArr);
 			printArr(inputArr);
